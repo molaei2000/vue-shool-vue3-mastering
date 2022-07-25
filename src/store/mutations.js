@@ -1,8 +1,13 @@
-import { findById, upsert } from '@/helpers'
-
+import { upsert, findById, docToResource } from '@/helpers'
 export default {
   setItem (state, { resource, item }) {
-    upsert(state[resource], item)
+    upsert(state[resource], docToResource(item))
+  },
+  appendUnsubscribe (state, { unsubscribe }) {
+    state.unsubscribes.push(unsubscribe)
+  },
+  clearAllUnsubscribes (state) {
+    state.unsubscribes = []
   },
   appendPostToThread: makeAppendChildToParentMutation({ parent: 'threads', child: 'posts' }),
   appendThreadToForum: makeAppendChildToParentMutation({ parent: 'forums', child: 'threads' }),
@@ -17,6 +22,7 @@ function makeAppendChildToParentMutation ({ parent, child }) {
       return
     }
     resource[child] = resource[child] || []
+
     if (!resource[child].includes(childId)) {
       resource[child].push(childId)
     }
