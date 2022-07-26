@@ -10,6 +10,7 @@ import sourceData from '@/data.json'
 import Profile from '@/pages/TheProfile'
 import { findById } from '@/helpers'
 import store from '@/store'
+import TheRegister from '@/pages/TheRegister'
 const routes = [
   {
     path: '/',
@@ -74,6 +75,11 @@ const routes = [
     name: 'ThreadEdit',
     component: ThreadEdit,
     props: true
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: TheRegister
   },
   {
     path: '/:pathMatch(.*)*',
