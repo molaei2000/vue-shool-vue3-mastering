@@ -11,6 +11,7 @@ import Profile from '@/pages/TheProfile'
 import { findById } from '@/helpers'
 import store from '@/store'
 import TheRegister from '@/pages/TheRegister'
+import SignIn from '@/pages/SignIn'
 const routes = [
   {
     path: '/',
@@ -80,6 +81,11 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: TheRegister
+  },
+  {
+    path: '/signin',
+    name: 'SignIn',
+    component: SignIn
   },
   {
     path: '/:pathMatch(.*)*',
