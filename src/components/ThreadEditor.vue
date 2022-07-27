@@ -46,6 +46,18 @@ export default {
       }
     }
   },
+  watch: {
+    form: {
+      handler () {
+        if (this.form.text !== this.text || this.form.title !== this.title) {
+          this.$emit('dirty')
+        } else {
+          this.$emit('clean')
+        }
+      },
+      deep: true
+    }
+  },
   computed: {
     existing () {
       return !!this.title
@@ -53,6 +65,7 @@ export default {
   },
   methods: {
     save () {
+      this.$emit('clean')
       this.$emit('save', { ...this.form })
     }
   }

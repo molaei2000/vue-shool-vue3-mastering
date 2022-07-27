@@ -4,7 +4,7 @@
       Create new thread in <i>{{ forum.name }}</i>
     </h1>
 
-    <ThreadEditor @save="save" @cancel="cancel"/>
+    <ThreadEditor @save="save" @cancel="cancel" @dirty="formIsDirty=true" @clean="formIsDirty=false"/>
   </div>
 </template>
 <script>
@@ -20,6 +20,11 @@ export default {
   computed: {
     forum () {
       return findById(this.$store.state.forums, this.forumId)
+    }
+  },
+  data () {
+    return {
+      formIsDirty: false
     }
   },
   mixins: [asyncDataStatus],
@@ -40,6 +45,12 @@ export default {
   async created () {
     await this.fetchForum({ id: this.forumId })
     this.asyncDataStatus_fetched()
+  },
+  beforeRouteLeave () {
+    if (this.formIsDirty) {
+      const confirm = window.confirm('Are You sure you want to leave? Unsaved changes will be lost')
+      if (!confirm) return false
+    }
   }
 }
 </script>
