@@ -21,7 +21,7 @@
 
     <post-list v-if="threadPosts" :posts="threadPosts" />
 
-    <post-editor @save="addPost" />
+    <post-editor @save="addPost" @dirty="isPostDirty= true" @clean="isPostDirty= false" />
   </div>
 </template>
 
@@ -40,6 +40,11 @@ export default {
     id: {
       required: true,
       type: String
+    }
+  },
+  data () {
+    return {
+      isPostDirty: false
     }
   },
   computed: {
@@ -80,6 +85,12 @@ export default {
     const users = posts.map(post => post.userId).concat(thread.userId)
     await this.fetchUsers({ ids: users })
     this.asyncDataStatus_fetched()
+  },
+  beforeRouteLeave () {
+    if (this.isPostDirty) {
+      const confirm = window.confirm('Are You sure you want to leave? Unsaved changes will be lost')
+      if (!confirm) return false
+    }
   }
 }
 </script>

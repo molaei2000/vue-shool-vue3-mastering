@@ -6,7 +6,6 @@ import NotFound from '@/pages/NotFound'
 import Forum from '@/pages/TheForum'
 import Category from '@/pages/TheCategory'
 import { createRouter, createWebHistory } from 'vue-router'
-import sourceData from '@/data.json'
 import Profile from '@/pages/TheProfile'
 import { findById } from '@/helpers'
 import store from '@/store'
@@ -22,7 +21,7 @@ const routes = [
     path: '/me',
     name: 'Profile',
     component: Profile,
-    meta: { toTop: true, smoothScroll: true }
+    meta: { toTop: true, smoothScroll: true, requiresAuth: true }
   },
   {
     path: '/me/edit',
@@ -88,6 +87,14 @@ const routes = [
     component: SignIn
   },
   {
+    path: '/logout',
+    name: 'SignOut',
+    async beforeEnter (to, from) {
+      await store.dispatch('signOut')
+      return { name: 'Home' }
+    }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFound
@@ -104,7 +111,10 @@ const router = createRouter({
   }
 })
 
-router.beforeEach(() => {
-  store.dispatch('unsubscribeAllSnapshots').then(r => console.log(r))
+router.beforeEach(async (to, from) => {
+  await store.dispatch('unsubscribeAllSnapshots')
+  if (to.meta?.requiresAuth && !store.state.authId) {
+    return { name: 'Home' }
+  }
 })
 export default router

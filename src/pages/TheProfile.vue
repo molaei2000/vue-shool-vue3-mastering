@@ -22,7 +22,6 @@ import PostList from '@/components/PostList'
 import UserProfileCard from '@/components/UserProfileCard'
 import UserProfileCardEditor from '@/components/UserProfileCardEditor'
 import { mapGetters } from 'vuex'
-import store from '@/store'
 export default {
   components: { PostList, UserProfileCard, UserProfileCardEditor },
   props: {
@@ -33,9 +32,9 @@ export default {
   },
   created () {
     this.$emit('ready')
-  },
-  beforeRouteEnter (to, from) {
-    if (store.state.authId) return { name: 'Home' }
   }
+  // beforeRouteEnter (to, from) {
+  //   if (store.state.authId) return { name: 'Home' }
+  // }
 }
 </script>

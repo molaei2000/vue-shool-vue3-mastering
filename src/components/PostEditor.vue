@@ -21,8 +21,21 @@ export default {
       postCopy: { ...this.post }
     }
   },
+  watch: {
+    postCopy: {
+      handler () {
+        if (this.postCopy.text !== this.post.text) {
+          this.$emit('dirty')
+        } else {
+          this.$emit('clean')
+        }
+      },
+      deep: true
+    }
+  },
   methods: {
     save () {
+      this.$emit('clean')
       this.$emit('save', { post: this.postCopy }) // access under eventData.post
       this.postCopy.text = ''
     }
