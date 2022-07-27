@@ -105,7 +105,7 @@ export default {
     const provider = new firebase.auth.GoogleAuthProvider()
     const response = await firebase.auth().signInWithPopup(provider)
     const user = response.user
-    const userRef = firebase.firestore().collection('users').doc(user.uid)
+    const userRef = await firebase.firestore().collection('users').doc(user.uid)
     const userDoc = await userRef.get()
     if (!userDoc.exists) {
       return dispatch('createUser', { id: user.uid, name: user.displayName, email: user.email, username: user.email, avatar: user.photoURL })
@@ -126,7 +126,18 @@ export default {
     commit('setItem', { resource: 'users', item: newUser })
     return docToResource(newUser)
   },
-  updateUser ({ commit }, user) {
+  async updateUser ({ commit }, user) {
+    const updates = {
+      avatar: user.avatar || null,
+      username: user.username || null,
+      name: user.name || null,
+      bio: user.bio || null,
+      website: user.website || null,
+      email: user.email || null,
+      location: user.location || null
+    }
+    const userRef = firebase.firestore().collection('users').doc(user.id)
+    await userRef.update(updates)
     commit('setItem', { resource: 'users', item: user })
   },
   // ---------------------------------------
@@ -154,7 +165,6 @@ export default {
   // Fetch All of a Resource
   // ---------------------------------------
   fetchAllCategories ({ commit }) {
-    console.log('🔥', '🏷', 'all')
     return new Promise((resolve) => {
       firebase.firestore().collection('categories').onSnapshot((querySnapshot) => {
         const categories = querySnapshot.docs.map(doc => {
@@ -164,6 +174,12 @@ export default {
         })
         resolve(categories)
       })
+    })
+  },
+  async fetchAuthUsersPosts ({ commit, state }) {
+    const posts = await firebase.firestore().collection('posts').where('userId', '==', state.authId).get()
+    posts.forEach(post => {
+      commit('setItem', { resource: 'posts', item: post })
     })
   },
   // ---------------------------------------
@@ -176,12 +192,15 @@ export default {
   fetchUsers: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'users', ids, emoji: '🙋' }),
 
   fetchItem ({ state, commit }, { id, emoji, resource, handleUnsubscribe = null }) {
-    console.log('🔥', emoji, id)
     return new Promise((resolve) => {
       const unsubscribe = firebase.firestore().collection(resource).doc(id).onSnapshot((doc) => {
-        const item = { ...doc.data(), id: doc.id }
-        commit('setItem', { resource, item })
-        resolve(item)
+        if (doc.exists) {
+          const item = { ...doc.data(), id: doc.id }
+          commit('setItem', { resource, item })
+          resolve(item)
+        } else {
+          resolve(null)
+        }
       })
       if (handleUnsubscribe) {
         handleUnsubscribe(unsubscribe)
