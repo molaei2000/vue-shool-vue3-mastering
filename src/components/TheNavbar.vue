@@ -1,11 +1,11 @@
 <template>
-  <header class="header" id="header">
+  <header class="header" id="header" v-click-outside="()=> mobileNavMenu = false" v-page-scroll="()=>mobileNavMenu=false">
 
     <router-link :to="{name: 'Home'}" class="logo">
       <img src="../assets/svg/vueschool-logo.svg">
     </router-link>
 
-    <div class="btn-hamburger">
+    <div class="btn-hamburger" @click="mobileNavMenu= !mobileNavMenu">
       <!-- use .btn-humburger-active to open the menu -->
       <div class="top bar"></div>
       <div class="middle bar"></div>
@@ -13,11 +13,14 @@
     </div>
 
     <!-- use .navbar-open to open nav -->
-    <nav class="navbar">
+    <nav class="navbar" :class="{'navbar-open':mobileNavMenu}">
       <ul>
         <li v-if="authUser" class="navbar-user">
-          <a @click.prevent="userDropdownOpen = !userDropdownOpen">
-            <img class="avatar-small" :src="authUser.avatar?authUser.avatar:'https://lh3.googleusercontent.com/a-/AFdZucomT9xH38rP7RAVSSPDjGVNyTimwjGE-KrIhxmAHA=s96-c'" :alt="`${authUser.name} profile picture`"/>
+          <a
+            @click.prevent="userDropdownOpen = !userDropdownOpen"
+            v-click-outside="()=> userDropdownOpen = false"
+          >
+            <img class="avatar-small" v-if="authUser.avatar" :src="authUser.avatar?authUser.avatar:'https://lh3.googleusercontent.com/a-/AFdZucomT9xH38rP7RAVSSPDjGVNyTimwjGE-KrIhxmAHA=s96-c'" :alt="`${authUser.name} profile picture`"/>
             <span>
                 {{authUser.name}}
                 <img class="icon-profile" src="../assets/svg/arrow-profile.svg" alt=""/>
@@ -30,7 +33,10 @@
             <div class="triangle-drop"></div>
             <ul class="dropdown-menu">
               <li class="dropdown-menu-item"><router-link :to="{name: 'Profile'}">View profile</router-link></li>
-              <li class="dropdown-menu-item"><a @click.prevent="$store.dispatch('signOut')">Sign Out</a></li>
+              <li class="dropdown-menu-item"><a
+                @click.prevent="$store.dispatch('signOut'),$router.push({ name: 'Home'})"
+              >Sign Out</a>
+              </li>
 <!--              <li class="dropdown-menu-item">-->
 <!--                <router-link to="/logout">Sign Out</router-link>-->
 <!--              </li>-->
@@ -39,6 +45,8 @@
         </li>
         <li v-if="!authUser" class="navbar-item"><router-link :to="{name: 'SignIn'}">Sign In</router-link></li>
         <li v-if="!authUser" class="navbar-item"><router-link :to="{name: 'Register'}">Register</router-link></li>
+<!--        <li v-if="authUser" class="navbar-item"><router-link :to="{name: 'Profile'}">View profile</router-link></li>-->
+<!--        <li v-if="authUser" class="navbar-item"><a @click.prevent="$store.dispatch('signOut'), $router.push({ name: 'Home'})">Sign Out</a></li>-->
       </ul>
 
       <!--      <ul>-->
@@ -76,8 +84,14 @@ export default {
   },
   data () {
     return {
-      userDropdownOpen: false
+      userDropdownOpen: false,
+      mobileNavMenu: false
     }
+  },
+  created () {
+    this.$router.beforeEach((to, from) => {
+      this.mobileNavMenu = false
+    })
   }
 }
 </script>
