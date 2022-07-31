@@ -1,5 +1,6 @@
 import firebase from 'firebase'
 import { findById, docToResource } from '@/helpers'
+import chunk from 'lodash/chunk'
 export default {
   initAuthentication ({ dispatch, commit, state }) {
     if (state.authObserverUnsubscribe) return
@@ -196,6 +197,12 @@ export default {
   fetchCategories: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'categories', ids, emoji: '🏷' }),
   fetchForums: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'forums', ids, emoji: '🏁' }),
   fetchThreads: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'threads', ids, emoji: '📄' }),
+  fetchThreadsByPage: ({ dispatch, commit }, { ids, page, perPage = 5 }) => {
+    commit('clearThreads')
+    const chunks = chunk(ids, perPage)
+    const limitedIds = chunks[page - 1]
+    return dispatch('fetchThreads', { ids: limitedIds })
+  },
   fetchPosts: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'posts', ids, emoji: '💬' }),
   fetchUsers: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'users', ids, emoji: '🙋' }),
 

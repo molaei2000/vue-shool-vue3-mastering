@@ -12,6 +12,9 @@ export default {
   setAuthObserverUnsubscribe (state, unsubscribe) {
     state.authObserverUnsubscribe = unsubscribe
   },
+  clearThreads (state) {
+    state.threads = []
+  },
   appendUnsubscribe (state, { unsubscribe }) {
     state.unsubscribes.push(unsubscribe)
   },
