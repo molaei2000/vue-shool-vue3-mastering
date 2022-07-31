@@ -1,5 +1,5 @@
 import firebase from 'firebase'
-import { findById, docToResource } from '@/helpers'
+import { findById, docToResource, makeFetchItemAction, makeFetchItemsAction } from '@/helpers'
 import chunk from 'lodash/chunk'
 export default {
   initAuthentication ({ dispatch, commit, state }) {
@@ -146,7 +146,7 @@ export default {
   // ---------------------------------------
   fetchCategory: ({ dispatch }, { id }) => dispatch('fetchItem', { emoji: '🏷', resource: 'categories', id }),
   fetchForum: ({ dispatch }, { id }) => dispatch('fetchItem', { emoji: '🏁', resource: 'forums', id }),
-  fetchThread: ({ dispatch }, { id }) => dispatch('fetchItem', { emoji: '📄', resource: 'threads', id }),
+  fetchThread: makeFetchItemAction({ emoji: '📄', resource: 'threads' }),
   fetchPost: ({ dispatch }, { id }) => dispatch('fetchItem', { emoji: '💬', resource: 'posts', id }),
   fetchUser: ({ dispatch }, { id }) => dispatch('fetchItem', { emoji: '🙋', resource: 'users', id }),
   fetchAuthUser: async ({ dispatch, state, commit }) => {
@@ -196,7 +196,7 @@ export default {
   // ---------------------------------------
   fetchCategories: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'categories', ids, emoji: '🏷' }),
   fetchForums: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'forums', ids, emoji: '🏁' }),
-  fetchThreads: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'threads', ids, emoji: '📄' }),
+  fetchThreads: makeFetchItemsAction({ emoji: '📄', resource: 'threads' }),
   fetchThreadsByPage: ({ dispatch, commit }, { ids, page, perPage = 5 }) => {
     commit('clearThreads')
     const chunks = chunk(ids, perPage)
@@ -206,12 +206,21 @@ export default {
   fetchPosts: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'posts', ids, emoji: '💬' }),
   fetchUsers: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'users', ids, emoji: '🙋' }),
 
-  fetchItem ({ state, commit }, { id, emoji, resource, handleUnsubscribe = null }) {
+  fetchItem ({ state, commit }, { id, emoji, resource, handleUnsubscribe = null, once = false, onSnapshot = null }) {
     return new Promise((resolve) => {
       const unsubscribe = firebase.firestore().collection(resource).doc(id).onSnapshot((doc) => {
+        if (once) {
+          unsubscribe()
+        }
         if (doc.exists) {
           const item = { ...doc.data(), id: doc.id }
+          let prevItem = findById(this.state[resource], id)
+          prevItem = prevItem ? { ...prevItem } : null
           commit('setItem', { resource, item })
+          if (typeof onSnapshot === 'function') {
+            const isLocal = doc.metadata.hasPendingWrites
+            onSnapshot({ item: { ...item }, prevItem, isLocal })
+          }
           resolve(item)
         } else {
           resolve(null)
@@ -224,8 +233,8 @@ export default {
       }
     })
   },
-  fetchItems ({ dispatch }, { ids, resource, emoji }) {
-    return Promise.all(ids.map(id => dispatch('fetchItem', { id, resource, emoji })))
+  fetchItems ({ dispatch }, { ids, resource, emoji, onSnapshot = null }) {
+    return Promise.all(ids.map(id => dispatch('fetchItem', { id, resource, emoji, onSnapshot })))
   },
   async unsubscribeAllSnapshots ({ state, commit }) {
     state.unsubscribes.forEach(unsubscribe => unsubscribe())

@@ -4,16 +4,18 @@
     <router-view v-show="showPage" @ready="onPageReady" :key="`${$route.path}${JSON.stringify($route.query)}`"/>
     <AppSpinner v-show="!showPage">loading...</AppSpinner>
   </div>
+  <AppNotifications/>
 </template>
 
 <script>
 import TheNavbar from '@/components/TheNavbar'
 import { mapActions } from 'vuex'
 import NProgress from 'nprogress'
+import AppNotifications from '@/components/AppNotifications'
 
 export default {
   name: 'App',
-  components: { TheNavbar },
+  components: { AppNotifications, TheNavbar },
   methods: {
     ...mapActions(['fetchAuthUser']),
     onPageReady () {

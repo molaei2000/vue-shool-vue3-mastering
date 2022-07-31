@@ -16,3 +16,9 @@ export const docToResource = (doc) => {
   if (typeof doc?.data !== 'function') return doc
   return { ...doc.data(), id: doc.id }
 }
+export const makeFetchItemAction = ({ emoji, resource }) => {
+  return ({ dispatch }, payload) => dispatch('fetchItem', { emoji, resource, ...payload })
+}
+export const makeFetchItemsAction = ({ emoji, resource }) => {
+  return ({ dispatch }, payload) => dispatch('fetchItems', { emoji, resource, ...payload })
+}
