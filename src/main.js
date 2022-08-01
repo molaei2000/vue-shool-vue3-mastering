@@ -8,6 +8,7 @@ import FontAwesome from '@/plugins/FontAwesome'
 import clickOutsideDirective from '@/plugins/ClickOutsideDirective'
 import pageScrollDirective from '@/plugins/PageScrollDirective'
 import VPagination from '@/plugins/vue3Pagination'
+import VeeValidatePlugin from '@/plugins/VeeValidatePlugin'
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig)
@@ -18,6 +19,7 @@ app.use(store)
 app.use(clickOutsideDirective)
 app.use(pageScrollDirective)
 app.use(VPagination)
+app.use(VeeValidatePlugin)
 app.use(FontAwesome)
 
 const requireComponent = require.context('./components', true, /App[A-Z]\w+\.(vue|js)$/)
