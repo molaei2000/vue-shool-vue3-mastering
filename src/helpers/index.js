@@ -22,3 +22,7 @@ export const makeFetchItemAction = ({ emoji, resource }) => {
 export const makeFetchItemsAction = ({ emoji, resource }) => {
   return ({ dispatch }, payload) => dispatch('fetchItems', { emoji, resource, ...payload })
 }
+export const arrayRandom = (array) => {
+  const randomIndex = Math.floor(Math.random() * array.length)
+  return array[randomIndex]
+}

@@ -20,7 +20,7 @@
             @click.prevent="userDropdownOpen = !userDropdownOpen"
             v-click-outside="()=> userDropdownOpen = false"
           >
-            <img class="avatar-small" v-if="authUser.avatar" :src="authUser.avatar?authUser.avatar:'https://lh3.googleusercontent.com/a-/AFdZucomT9xH38rP7RAVSSPDjGVNyTimwjGE-KrIhxmAHA=s96-c'" :alt="`${authUser.name} profile picture`"/>
+            <AppAvatarImg class="avatar-small" v-if="authUser.avatar" :src="authUser.avatar" :alt="`${authUser.name} profile picture`"/>
             <span>
                 {{authUser.name}}
                 <img class="icon-profile" src="../assets/svg/arrow-profile.svg" alt=""/>

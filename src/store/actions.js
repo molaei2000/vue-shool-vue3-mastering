@@ -1,6 +1,8 @@
 import firebase from 'firebase'
 import { findById, docToResource, makeFetchItemAction, makeFetchItemsAction } from '@/helpers'
 import chunk from 'lodash/chunk'
+import useNotification from '@/composables/useNotification'
+
 export default {
   initAuthentication ({ dispatch, commit, state }) {
     if (state.authObserverUnsubscribe) return
@@ -97,7 +99,22 @@ export default {
   },
   async registerUserWithEmailAndPassword ({ dispatch }, { avatar = null, email, name, username, password }) {
     const result = await firebase.auth().createUserWithEmailAndPassword(email, password)
+    avatar = await dispatch('uploadAvatar', { authId: result.user.uid, file: avatar })
     await dispatch('createUser', { id: result.user.uid, email, name, username, avatar })
+  },
+  async uploadAvatar ({ state }, { authId, file, fileName }) {
+    if (!file) return null
+    authId = authId || state.authId
+    fileName = fileName || file.name
+    try {
+      const storageBucket = firebase.storage().ref().child(`uploads/${authId}/images/${Date.now()}-${fileName}`)
+      const snapshot = await storageBucket.put(file)
+      const url = await snapshot.ref.getDownloadURL()
+      return url
+    } catch (e) {
+      const { addNotification } = useNotification()
+      addNotification({ message: 'Error in uploading avatar', timeout: 5000, type: 'error' })
+    }
   },
   signInWithEmailAndPassword (context, { email, password }) {
     return firebase.auth().signInWithEmailAndPassword(email, password)
