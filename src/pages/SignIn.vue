@@ -7,7 +7,7 @@
 
         <AppFormField v-model="form.email" name="email" label="Email" :rules="{required:true,email:true}"/>
 
-        <AppFormField v-model="form.password" name="password" label="Password"  rules="required|min:8" />
+        <AppFormField v-model="form.password" type="password" name="password" label="Password"  rules="required|min:8" />
 
         <div class="push-top">
           <button type="submit" class="btn-blue btn-block">Log in</button>

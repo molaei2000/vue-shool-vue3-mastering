@@ -5,7 +5,7 @@
       :name="name"
       :label="label"
       :id="name"
-      :type="name"
+      :type="type"
       :modelValue="modelValue"
       @input="$emit('modelUpdate',$event)"
       v-bind="$attrs"
@@ -18,9 +18,11 @@
 <script>
 export default {
   name: 'AppFormField',
+  inheritAttrs: false,
   props: {
     name: { type: String, required: true },
-    label: { type: String, required: true },
+    label: { type: String, required: false },
+    type: { type: String, default: 'text' },
     modelValue: { type: String, default: '' }
   }
 }

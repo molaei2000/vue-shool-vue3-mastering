@@ -11,7 +11,7 @@
 
         <AppFormField v-model="form.email" name="email" label="Email" :rules="{required:true,email:true, unique:{collection:'users',field:'email'}}"/>
 
-        <AppFormField v-model="form.password" name="password" label="Password"  rules="required|min:8" />
+        <AppFormField v-model="form.password" type="password" name="password" label="Password"  rules="required|min:8" />
 
         <div class="form-group">
           <label for="avatar">
