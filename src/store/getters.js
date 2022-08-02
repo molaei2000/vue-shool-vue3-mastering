@@ -19,6 +19,9 @@ export default {
         get threads () {
           return state.threads.filter(post => post.userId === user.id)
         },
+        get threadIds () {
+          return user.threads
+        },
         get threadsCount () {
           return user.threads?.length || 0
         }
@@ -38,6 +41,7 @@ export default {
           return thread.posts.length - 1
         },
         get contributorsCount () {
+          if (!thread.contributors) return 0
           return thread.contributors.length
         }
       }

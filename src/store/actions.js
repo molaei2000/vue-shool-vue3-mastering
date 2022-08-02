@@ -1,4 +1,4 @@
-import firebase from 'firebase'
+import firebase from '@/helpers/firebase'
 import { findById, docToResource, makeFetchItemAction, makeFetchItemsAction } from '@/helpers'
 import chunk from 'lodash/chunk'
 import useNotification from '@/composables/useNotification'
@@ -23,15 +23,17 @@ export default {
   async createPost ({ commit, state }, post) {
     post.userId = state.authId
     post.publishedAt = firebase.firestore.FieldValue.serverTimestamp()
+    post.firstInThread = post.firstInThread || false
     const batch = firebase.firestore().batch()
     const postRef = firebase.firestore().collection('posts').doc()
     const threadRef = firebase.firestore().collection('threads').doc(post.threadId)
     const userRef = firebase.firestore().collection('users').doc(state.authId)
     batch.set(postRef, post)
-    batch.update(threadRef, {
-      posts: firebase.firestore.FieldValue.arrayUnion(postRef.id),
-      contributors: firebase.firestore.FieldValue.arrayUnion(state.authId)
-    })
+    const threadUpdates = {
+      posts: firebase.firestore.FieldValue.arrayUnion(postRef.id)
+    }
+    if (!post.firstInThread) threadUpdates.contributors = firebase.firestore.FieldValue.arrayUnion(state.authId)
+    batch.update(threadRef, threadUpdates)
     batch.update(userRef, {
       postsCount: firebase.firestore.FieldValue.increment(1)
     })
@@ -39,7 +41,9 @@ export default {
     const newPost = await postRef.get()
     commit('setItem', { resource: 'posts', item: { ...newPost.data(), id: newPost.id } }) // set the post
     commit('appendPostToThread', { childId: newPost.id, parentId: post.threadId }) // append post to thread
-    commit('appendContributorToThread', { childId: state.authId, parentId: post.threadId })
+    if (!post.firstInThread) {
+      commit('appendContributorToThread', { childId: state.authId, parentId: post.threadId })
+    }
   },
   async updatePost ({ commit, state }, { text, id }) {
     const post = {
@@ -77,7 +81,7 @@ export default {
     commit('setItem', { resource: 'threads', item: { ...newThread.data(), id: newThread.id } })
     commit('appendThreadToUser', { parentId: userId, childId: threadRef.id })
     commit('appendThreadToForum', { parentId: forumId, childId: threadRef.id })
-    await dispatch('createPost', { text, threadId: threadRef.id })
+    await dispatch('createPost', { text, threadId: threadRef.id, firstInThread: true })
     return findById(state.threads, threadRef.id)
   },
   async updateThread ({ commit, state }, { title, text, id }) {
@@ -251,7 +255,11 @@ export default {
     })
   },
   fetchItems ({ dispatch }, { ids, resource, emoji, onSnapshot = null }) {
+    ids = ids || []
     return Promise.all(ids.map(id => dispatch('fetchItem', { id, resource, emoji, onSnapshot })))
+  },
+  clearItems ({ commit }, { modules = [] }) {
+    commit('clearItems', { modules })
   },
   async unsubscribeAllSnapshots ({ state, commit }) {
     state.unsubscribes.forEach(unsubscribe => unsubscribe())

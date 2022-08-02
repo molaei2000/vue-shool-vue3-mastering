@@ -15,6 +15,11 @@ export default {
   clearThreads (state) {
     state.threads = []
   },
+  clearItems (state, { modules = [] }) {
+    modules.forEach(module => {
+      state[module] = []
+    })
+  },
   appendUnsubscribe (state, { unsubscribe }) {
     state.unsubscribes.push(unsubscribe)
   },
