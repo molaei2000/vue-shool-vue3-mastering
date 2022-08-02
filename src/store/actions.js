@@ -4,6 +4,13 @@ import chunk from 'lodash/chunk'
 import useNotification from '@/composables/useNotification'
 
 export default {
+  async updateEmail ({ state }, { email }) {
+    return await firebase.auth().currentUser.updateEmail(email)
+  },
+  async reauthenticate ({ state }, { email, password }) {
+    const credential = await firebase.auth.EmailAuthProvider.credential(email, password)
+    await firebase.auth().currentUser.reauthenticateWithCredential(credential)
+  },
   initAuthentication ({ dispatch, commit, state }) {
     if (state.authObserverUnsubscribe) return
     return new Promise((resolve) => {

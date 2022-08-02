@@ -40,26 +40,33 @@
         <button type="submit" class="btn-blue">Save</button>
       </div>
     </VeeForm>
+    <UserProfileCardEditorReauthenticate :modal-value="needsReAuth" @success="onReauthenticated" @fail="onReauthenticatedFailed" />
   </div>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
 import UserProfileCardEditorRandomAvatar from '@/components/UserProfileCardEditorRandomAvatar'
-
+import UserProfileCardEditorReauthenticate from '@/components/UserProfileCardEditorReauthenticate'
+import useNotification from '@/composables/useNotification'
 export default {
-  components: { UserProfileCardEditorRandomAvatar },
+  components: { UserProfileCardEditorReauthenticate, UserProfileCardEditorRandomAvatar },
   props: {
     user: {
       type: Object,
       required: true
     }
   },
+  setup () {
+    const { addNotification } = useNotification()
+    return { addNotification }
+  },
   data () {
     return {
       uploadingImage: false,
       activeUser: { ...this.user },
-      locationOptions: []
+      locationOptions: [],
+      needsReAuth: false
     }
   },
   methods: {
@@ -83,10 +90,27 @@ export default {
         this.activeUser.avatar = await this.uploadAvatar({ file: blob, fileName: 'random' })
       }
     },
+    async onReauthenticatedFailed () {
+      this.addNotification({ message: 'Error updating user', timeout: 5000, type: 'error' })
+      this.$router.push({ name: 'Profile' })
+    },
+    async onReauthenticated () {
+      await this.$store.dispatch('updateEmail', { email: this.activeUser.email })
+      await this.saveUserData()
+    },
+    async saveUserData () {
+      await this.$store.dispatch('updateUser', { ...this.activeUser, threads: this.activeUser.threadIds })
+      this.$router.push({ name: 'Profile' })
+      this.addNotification({ message: 'user successfully updated', timeout: 5000 })
+    },
     async save () {
       await this.handleRandomAvatarUpload()
-      this.$store.dispatch('updateUser', { ...this.activeUser, threads: this.activeUser.threadIds })
-      this.$router.push({ name: 'Profile' })
+      const emailChanged = this.activeUser.email !== this.user.email
+      if (emailChanged) {
+        this.needsReAuth = true
+      } else {
+        await this.saveUserData()
+      }
     },
     cancel () {
       this.$router.push({ name: 'Profile' })
