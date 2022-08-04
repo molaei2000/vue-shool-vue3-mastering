@@ -40,6 +40,12 @@
         <button type="submit" class="btn-blue">Save</button>
       </div>
     </VeeForm>
+    <VeeForm @submit="changePassword">
+      <AppFormField name="current-password" type="password" label="Current Password" v-model="currentPassword" rules="required|min:8"/>
+      <AppFormField name="new-password" type="password" label="New Password" v-model="newPassword" rules="required|min:8"/>
+      <AppFormField name="confirm-new-password" type="password" label="Confirm new Password" v-model="confirmNewPassword" :rules="`required|sameAs:${newPassword}`"/>
+      <button type="submit" class="btn-blue">change password</button>
+    </VeeForm>
     <UserProfileCardEditorReauthenticate :modal-value="needsReAuth" @success="onReauthenticated" @fail="onReauthenticatedFailed" />
   </div>
 </template>
@@ -66,7 +72,10 @@ export default {
       uploadingImage: false,
       activeUser: { ...this.user },
       locationOptions: [],
-      needsReAuth: false
+      needsReAuth: false,
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: ''
     }
   },
   methods: {
@@ -74,6 +83,15 @@ export default {
     async loadLocationOptions () {
       const res = await fetch('https://restcountries.com/v3.1/all')
       this.locationOptions = await res.json()
+    },
+    async changePassword () {
+      try {
+        await this.$store.dispatch('changePassword', { email: this.activeUser.email, currentPassword: this.currentPassword, newPassword: this.newPassword })
+        this.$router.push({ name: 'Profile' })
+        this.addNotification({ message: 'user successfully updated', timeout: 5000 })
+      } catch (e) {
+        console.log(e)
+      }
     },
     async handleAvatarUpload (e) {
       this.uploadingImage = true

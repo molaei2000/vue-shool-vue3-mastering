@@ -11,6 +11,18 @@ export default {
     const credential = await firebase.auth.EmailAuthProvider.credential(email, password)
     await firebase.auth().currentUser.reauthenticateWithCredential(credential)
   },
+  async changePassword ({ state }, { email, currentPassword, newPassword }) {
+    const credential = await firebase.auth.EmailAuthProvider.credential(email, currentPassword)
+    await firebase.auth().currentUser.reauthenticateWithCredential(credential).then(() => {
+      firebase.auth().currentUser.updatePassword(newPassword).then(() => {
+        console.log('changing password success')
+      }).catch((error) => {
+        console.log(error)
+      })
+    }).catch(e => {
+      console.log(e)
+    })
+  },
   initAuthentication ({ dispatch, commit, state }) {
     if (state.authObserverUnsubscribe) return
     return new Promise((resolve) => {

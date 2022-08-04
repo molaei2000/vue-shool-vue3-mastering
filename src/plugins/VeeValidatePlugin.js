@@ -18,6 +18,15 @@ export default (app) => {
     const querySnapshot = await firebase.firestore().collection(collection).where(field, '==', value).get()
     return querySnapshot.empty
   })
+  defineRule('sameAs', (value, args) => {
+    let password
+    if (Array.isArray(args)) {
+      [password] = args
+    } else {
+      ({ password } = args)
+    }
+    if (value === password) return true
+  })
 
   configure({
     generateMessage: localize('en', {
@@ -26,7 +35,8 @@ export default (app) => {
         email: '{field} must be a valid email',
         min: '{field} must be at least 0:{min} characters',
         unique: '{field} is already taken',
-        url: '{field} must be a valid url'
+        url: '{field} must be a valid url',
+        sameAs: '{field} must be same as password'
       }
     })
   })
