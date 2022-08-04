@@ -2,6 +2,11 @@
   <div v-if="asyncDataStatus_ready" class="container">
     <div class="col-full push-top">
       <div v-if="forum" class="forum-header">
+        <AppHead>
+          <title>
+            {{forum?.name}}
+          </title>
+        </AppHead>
         <div class="forum-details">
           <h1>{{ forum.name }}</h1>
           <p class="text-lead">{{ forum.description }}</p>

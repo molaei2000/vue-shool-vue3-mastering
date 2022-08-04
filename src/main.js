@@ -9,6 +9,7 @@ import clickOutsideDirective from '@/plugins/ClickOutsideDirective'
 import pageScrollDirective from '@/plugins/PageScrollDirective'
 import VPagination from '@/plugins/vue3Pagination'
 import VeeValidatePlugin from '@/plugins/VeeValidatePlugin'
+import { createHead, Head } from '@vueuse/head'
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig)
@@ -21,6 +22,7 @@ app.use(pageScrollDirective)
 app.use(VPagination)
 app.use(VeeValidatePlugin)
 app.use(FontAwesome)
+app.use(createHead())
 
 const requireComponent = require.context('./components', true, /App[A-Z]\w+\.(vue|js)$/)
 requireComponent.keys().forEach(function (fileName) {
@@ -33,5 +35,5 @@ requireComponent.keys().forEach(function (fileName) {
   )
   app.component(baseComponentName, baseComponentConfig)
 })
-
+app.component('AppHead', Head)
 app.mount('#app')

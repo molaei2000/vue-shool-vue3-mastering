@@ -1,4 +1,10 @@
 <template>
+  <Head>
+    <title>
+      Vue.js 3 master class Forum
+    </title>
+    <meta name="description" content="An Awesome vue forum application" >
+  </Head>
   <the-navbar/>
   <div class="container">
     <router-view v-show="showPage" @ready="onPageReady" :key="`${$route.path}${JSON.stringify($route.query)}`"/>
@@ -12,10 +18,11 @@ import TheNavbar from '@/components/TheNavbar'
 import { mapActions } from 'vuex'
 import NProgress from 'nprogress'
 import AppNotifications from '@/components/AppNotifications'
+import { Head } from '@vueuse/head'
 
 export default {
   name: 'App',
-  components: { AppNotifications, TheNavbar },
+  components: { AppNotifications, TheNavbar, Head },
   methods: {
     ...mapActions(['fetchAuthUser']),
     onPageReady () {
